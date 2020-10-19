@@ -1,11 +1,19 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <MessangerClient.h>
+#include <QQuickStyle>
+#include <QTextCodec>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     QGuiApplication app(argc, argv);
+
+    MessangerClient *client = new MessangerClient();
+
+    QQuickStyle::setStyle("Material");
+    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/main.qml"));
