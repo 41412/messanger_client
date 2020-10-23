@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <MessangerClient.h>
+#include <QQmlContext>
 #include <QQuickStyle>
 #include <QTextCodec>
 
@@ -10,18 +11,24 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    MessangerClient *client = new MessangerClient();
+    MessangerClient *messangerclient = new MessangerClient();
+
+//    messangerclient->writeData(0, "hellllllo");
+
 
     QQuickStyle::setStyle("Material");
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
 
     QQmlApplicationEngine engine;
+
+    engine.rootContext()->setContextProperty("messangerclient", messangerclient);
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
     engine.load(url);
 
     return app.exec();

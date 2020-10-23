@@ -3,13 +3,19 @@ import QtQuick.Controls 2.13
 import MessangerClient 1.0
 
 Item {
+    id: item_loginwindow
     x: 0
     y: 0
     width: 500
     height: 700
 
-    property var hostIP: "127.0.0.1"
-    property real portNumber: 1024
+    property var hostIP: "192.168.10.200"
+    property real portNumber: 35000
+
+    function eraseLoginInfo() {
+        textfield_nickname.text = "";
+        textfield_password.text = "";
+    }
 
     function resetSubmitWindow() {
         textfield_submit_nickname.text = "";
@@ -20,6 +26,29 @@ Item {
 
     MessangerClient {
         id: messangerclient
+    }
+
+    Connections {
+        target: messangerclient
+        onResLogin: {
+            if(protocol === 0) {
+                // TODO : change view from Loginview to Chatlistview
+                text_error_loginwindow.text = data;
+            }
+            else if(protocol === 1) {
+                text_error_loginwindow.text = data;
+            }
+        }
+
+        onResSubmit: {
+            if(protocol === 2) {
+                resetSubmitWindow()
+                popup_submit_success.open()
+            }
+            else if(protocol === 3) {
+                text_error_submitwindow.text = data;
+            }
+        }
     }
 
 // Popup (Submit Window) start
@@ -70,6 +99,7 @@ Item {
             y: (parent.y + parent.height) * 0.425
             width: (parent.x + parent.width)  * 0.60
             height: (parent.y + parent.height) * 0.08
+            placeholderText: "more than 4 letters required."
             echoMode: TextInput.Password
         }
 
@@ -79,6 +109,7 @@ Item {
             y: (parent.y + parent.height) * 0.50
             width: (parent.x + parent.width)  * 0.60
             height: (parent.y + parent.height) * 0.08
+            placeholderText: "please repeat password."
             echoMode: TextInput.Password
         }
 
@@ -92,30 +123,25 @@ Item {
             text: "등록"
 
             onClicked: {
-                if (textfield_submit_nickname.text.length < 1 ||
-                        textfield_submit_password.text.length < 1 ||
-                        textfield_submit_confirm.text.length < 1) {
-                    text_error_submitwindow.text = "Nickname or Password is empty."
-                }
-                else if(textfield_submit_password.length < 4) {
-                    text_error_submitwindow.text = "Password must be more than 4 letters."
-                }
-                else if(textfield_submit_password.text != textfield_submit_confirm.text) {
-                    text_error_submitwindow.text = "Both of password are NOT same."
-                }
-                else
-                {
-                    messangerclient.requestSubmit(textfield_nickname.text, textfield_password.text)
-
-                    resetSubmitWindow()
-                    popup_submit.close()
-//                    var result = messangerclient.requestSubmit(textfield_nickname.text, textfield_password.text)
-//                    if(result == error) {
-//                        text_error_submitwindow.text = "Nickname is already used."
+//                if (textfield_submit_nickname.text.length < 1 ||
+//                        textfield_submit_password.text.length < 1 ||
+//                        textfield_submit_confirm.text.length < 1) {
+//                    text_error_submitwindow.text = "Nickname or Password is empty."
+//                }
+//                else if(textfield_submit_password.length < 4) {
+//                    text_error_submitwindow.text = "Password must be more than 4 letters."
+//                }
+//                else if(textfield_submit_password.text != textfield_submit_confirm.text) {
+//                    text_error_submitwindow.text = "Both of password are NOT same."
+//                }
+//                else
+//                {
+//                    if(messangerclient.connectToHost(hostIP, portNumber)) {
+//                        messangerclient.requestSubmit(textfield_submit_nickname.text, textfield_submit_password.text)
 //                    }
-//                    else {
-//                    }
-                }
+//                }
+                messangerclient.connectToHost(hostIP, portNumber)
+                messangerclient.requestSubmit(textfield_submit_nickname.text, textfield_submit_password.text, textfield_submit_confirm.text)
             }
         }
 
@@ -137,6 +163,38 @@ Item {
     }
 // Popup (Submit Window) end
 
+// Popup (Submit Success Window)
+    Popup {
+        id: popup_submit_success
+        width: 250
+        height: 150
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+
+        Text {
+            x: 25
+            y: 50
+            text: "Submit Success !"
+        }
+
+        Button {
+            id: button_confirm_submitsuccess
+            x: 80
+            y: 80
+            width: 90
+            height: 50
+            text: "확인"
+
+            onClicked: {
+                popup_submit.close()
+                popup_submit_success.close()
+                messangerclient.clientDisconnect()
+            }
+        }
+    }
+
+// Popup (Submit Success Window) end
+
     Text {
         x: 25
         y: 300
@@ -147,6 +205,14 @@ Item {
         x: 25
         y: 360
         text: "Password"
+    }
+
+    Text {
+        id: text_error_loginwindow
+        x: 125
+        y: 410
+        color: "red"
+        text: ""
     }
 
 
@@ -177,18 +243,19 @@ Item {
         text: "로그인"
 
         onClicked: {
-            if (textfield_nickname.text.length < 1 ||
-                    textfield_password.text.length < 1 ||
-                    textfield_confirm.text.length < 1) {
-                text_error_submitwindow.text = "Nickname or Password is empty."
-            }
-            else if(textfield_submit_password.length < 4) {
-                text_error_submitwindow.text = "Password must be more than 4 letters."
-            }
-            else if(textfield_submit_password.text != textfield_submit_confirm.text) {
-                text_error_submitwindow.text = "Both of password are NOT same."
-            }
-            messangerclient.connectToHost(hostIP, portNumber)
+//            if (textfield_nickname.text.length < 1 ||
+//                    textfield_password.text.length < 1) {
+//                text_error_loginwindow.text = "Nickname or Password is empty."
+//            }
+
+////            else if(messangerclient.connectToHost(hostIP, portNumber)) {
+//            else {
+//                messangerclient.connectToHost(hostIP, portNumber)
+//                messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
+//            }
+                messangerclient.connectToHost(hostIP, portNumber)
+                messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
+            eraseLoginInfo()
         }
     }
 
@@ -203,6 +270,88 @@ Item {
 
         onClicked: {
             popup_submit.open()
+            eraseLoginInfo()
+            text_error_loginwindow.text = "";
+        }
+    }
+
+    Button {
+        id: button_toggle_debugmenu
+
+        x: 25
+        y: 600
+        width: 120
+        height: 50
+        text: "Debug Menu"
+
+        onClicked: {
+            item_debugmenu.visible = !(item_debugmenu.visible)
+        }
+    }
+
+    Item {
+        id: item_debugmenu
+
+        Component.onCompleted: {
+            this.visible = false
+        }
+
+        Button {
+            id: test_connectbutton
+
+            x: 150
+            y: 600
+            width: 100
+            height: 50
+            text:"Connect"
+
+            onClicked: {
+                if(messangerclient.connectToHost(hostIP, portNumber)) {
+                    messangerclient.writeforDebugging(testfield.text)
+                }
+            }
+        }
+
+        Button {
+            id: test_closebutton
+
+            x: 150
+            y: 650
+            width: 100
+            height: 50
+            text:"Disconnect"
+
+            onClicked: {
+                messangerclient.clientDisconnect()
+            }
+        }
+
+        Button {
+            id: test_resloginsignal
+
+            x: 260
+            y: 600
+            width: 100
+            height: 50
+            text: "Login Signal"
+
+            onClicked: {
+                messangerclient.testlogin()
+            }
+        }
+
+        Button {
+            id: test_ressubmitsignal
+
+            x: 260
+            y: 650
+            width: 100
+            height: 50
+            text: "Submit Signal"
+
+            onClicked: {
+                messangerclient.testsubmit()
+            }
         }
     }
 }
