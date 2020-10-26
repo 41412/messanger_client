@@ -24,19 +24,20 @@ Item {
         text_error_submitwindow.text = ""
     }
 
-    MessangerClient {
-        id: messangerclient
-    }
+//    MessangerClient {
+//        id: messangerclient
+//    }
 
     Connections {
         target: messangerclient
         onResLogin: {
             if(protocol === 0) {
                 // TODO : change view from Loginview to Chatlistview
-
+                currentState = "CHATLIST_VIEW"
             }
             else if(protocol === 1) {
                 text_error_loginwindow.text = data
+                messangerclient.clientDisconnect()
             }
         }
 
@@ -325,6 +326,22 @@ Item {
 
             onClicked: {
                 messangerclient.testsubmit()
+            }
+        }
+
+        CheckBox {
+            id: checkbox_debug_localhost
+            x: 350
+            y: 0
+            text: "Link Localhost"
+
+            onCheckStateChanged: {
+                if(checkbox_debug_localhost.checkState === Qt.Checked) {
+                    hostIP = "192.168.10.194"
+                }
+                else if(checkbox_debug_localhost.checkState === Qt.Unchecked) {
+                    hostIP = "192.168.10.200"
+                }
             }
         }
     }

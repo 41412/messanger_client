@@ -140,6 +140,7 @@ QByteArray MessangerClient::intToArray(qint32 source)
 void MessangerClient::clientDisconnect()
 {
     socket->disconnectFromHost();
+    emit disconnected();
     qDebug() << "[Debug] socket is disconnected.";
 }
 

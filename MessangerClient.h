@@ -18,7 +18,6 @@ enum { LOGIN_SUCCESS = 0, LOGIN_FAIL = 1, SUBMIT_SUCCESS, SUBMIT_FAIL };        
 
 class MessangerClient : public QObject
 {
-public:
     Q_OBJECT
 
 public:
@@ -42,6 +41,7 @@ public:
 signals:
     void resLogin(int protocol, QString data);
     void resSubmit(int protocol, QString data);
+    void disconnected();
 //    void error(int socketError, QString &message);
 
 public slots:

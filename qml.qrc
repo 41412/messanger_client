@@ -6,5 +6,6 @@
         <file>FriendListView.qml</file>
         <file>NavigationTab.qml</file>
         <file>ChatView.qml</file>
+        <file>ProfileView.qml</file>
     </qresource>
 </RCC>
