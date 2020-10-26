@@ -2,5 +2,9 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>LoginWindow.qml</file>
+        <file>ChatListView.qml</file>
+        <file>FriendListView.qml</file>
+        <file>NavigationTab.qml</file>
+        <file>ChatView.qml</file>
     </qresource>
 </RCC>

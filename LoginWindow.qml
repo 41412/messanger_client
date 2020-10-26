@@ -13,15 +13,15 @@ Item {
     property real portNumber: 35000
 
     function eraseLoginInfo() {
-        textfield_nickname.text = "";
-        textfield_password.text = "";
+        textfield_nickname.text = ""
+        textfield_password.text = ""
     }
 
     function resetSubmitWindow() {
-        textfield_submit_nickname.text = "";
-        textfield_submit_password.text = "";
-        textfield_submit_confirm.text = "";
-        text_error_submitwindow.text = "";
+        textfield_submit_nickname.text = ""
+        textfield_submit_password.text = ""
+        textfield_submit_confirm.text = ""
+        text_error_submitwindow.text = ""
     }
 
     MessangerClient {
@@ -33,10 +33,10 @@ Item {
         onResLogin: {
             if(protocol === 0) {
                 // TODO : change view from Loginview to Chatlistview
-                text_error_loginwindow.text = data;
+
             }
             else if(protocol === 1) {
-                text_error_loginwindow.text = data;
+                text_error_loginwindow.text = data
             }
         }
 
@@ -46,7 +46,8 @@ Item {
                 popup_submit_success.open()
             }
             else if(protocol === 3) {
-                text_error_submitwindow.text = data;
+                text_error_submitwindow.text = data
+                messangerclient.clientDisconnect()
             }
         }
     }
@@ -123,23 +124,6 @@ Item {
             text: "등록"
 
             onClicked: {
-//                if (textfield_submit_nickname.text.length < 1 ||
-//                        textfield_submit_password.text.length < 1 ||
-//                        textfield_submit_confirm.text.length < 1) {
-//                    text_error_submitwindow.text = "Nickname or Password is empty."
-//                }
-//                else if(textfield_submit_password.length < 4) {
-//                    text_error_submitwindow.text = "Password must be more than 4 letters."
-//                }
-//                else if(textfield_submit_password.text != textfield_submit_confirm.text) {
-//                    text_error_submitwindow.text = "Both of password are NOT same."
-//                }
-//                else
-//                {
-//                    if(messangerclient.connectToHost(hostIP, portNumber)) {
-//                        messangerclient.requestSubmit(textfield_submit_nickname.text, textfield_submit_password.text)
-//                    }
-//                }
                 messangerclient.connectToHost(hostIP, portNumber)
                 messangerclient.requestSubmit(textfield_submit_nickname.text, textfield_submit_password.text, textfield_submit_confirm.text)
             }
@@ -243,18 +227,8 @@ Item {
         text: "로그인"
 
         onClicked: {
-//            if (textfield_nickname.text.length < 1 ||
-//                    textfield_password.text.length < 1) {
-//                text_error_loginwindow.text = "Nickname or Password is empty."
-//            }
-
-////            else if(messangerclient.connectToHost(hostIP, portNumber)) {
-//            else {
-//                messangerclient.connectToHost(hostIP, portNumber)
-//                messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
-//            }
-                messangerclient.connectToHost(hostIP, portNumber)
-                messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
+            messangerclient.connectToHost(hostIP, portNumber)
+            messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
             eraseLoginInfo()
         }
     }

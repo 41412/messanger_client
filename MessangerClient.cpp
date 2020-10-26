@@ -168,11 +168,6 @@ void MessangerClient::requestSubmit(QString nickname, QString password, QString 
         emit resSubmit(SUBMIT_FAIL, "Nickname or Password is empty.");
         return;
     }
-    if(password.length() < 4)
-    {
-        emit resSubmit(SUBMIT_FAIL, "Password must be more than 4 letters.");
-        return;
-    }
     if(password != confirm)
     {
         emit resSubmit(SUBMIT_FAIL, "Both of password are NOT same.");
