@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <MessangerClient.h>
+#include <user.h>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QTextCodec>
@@ -12,9 +13,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     MessangerClient *messangerclient = new MessangerClient();
-
-//    messangerclient->writeData(0, "hellllllo");
-
+    User *u = new User();
 
     QQuickStyle::setStyle("Material");
 

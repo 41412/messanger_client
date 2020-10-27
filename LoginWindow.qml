@@ -33,12 +33,14 @@ Item {
         onResLogin: {
             if(protocol === 0) {
                 // TODO : change view from Loginview to Chatlistview
-                currentState = "CHATLIST_VIEW"
+//                messangerclient.loadingUserData(textfield_nickname.text)
+                messangerclient.requestUserData(textfield_nickname.text)
             }
             else if(protocol === 1) {
                 text_error_loginwindow.text = data
                 messangerclient.clientDisconnect()
             }
+            eraseLoginInfo()
         }
 
         onResSubmit: {
@@ -50,6 +52,10 @@ Item {
                 text_error_submitwindow.text = data
                 messangerclient.clientDisconnect()
             }
+        }
+
+        onLoginCompleted: {
+            currentState = "CHATLIST_VIEW"
         }
     }
 
@@ -230,7 +236,6 @@ Item {
         onClicked: {
             messangerclient.connectToHost(hostIP, portNumber)
             messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
-            eraseLoginInfo()
         }
     }
 

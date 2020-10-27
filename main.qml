@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Window 2.13
 import MessangerClient 1.0
+import User 1.0
 
 Window {
     visible: true
@@ -34,6 +35,10 @@ Window {
 
     MessangerClient {
         id: messangerclient
+    }
+
+    User {
+        id: user
     }
 
     LoginWindow {

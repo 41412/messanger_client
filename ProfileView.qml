@@ -3,7 +3,20 @@ import QtQuick.Controls 2.13
 
 Item {
     Text {
-        text: "ProfileView"
+        id: text_nickname
+        x: 25
+        y: 10
+        scale: 15
+        text: "Nickname"
+//        text: user.getNickname()
+    }
+
+    Text {
+        id: text_introduce
+        x: 25
+        y: 60
+        scale: 12
+        text: "Introducing Message"
     }
 
     Button {

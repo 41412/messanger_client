@@ -21,24 +21,35 @@ bool MessangerClient::isConnected()
     return (socket->state() == QAbstractSocket::ConnectedState);
 }
 
+bool MessangerClient::writeData(PROTOCOL_CLIENT sendtype)
+{
+    QByteArray msg = (QString::number(sendtype)).toStdString().c_str();
+    if(!isConnected())
+    {
+        return false;
+    }
+    qDebug() << "[Debug] write size : " << intToArray(msg.size());
+    msg.prepend(intToArray(msg.size()));
+    qDebug() << "[Debug] write data : " << msg;
+    socket->write(msg);
+    return socket->waitForBytesWritten(TIMEOUT);
+}
 bool MessangerClient::writeData(PROTOCOL_CLIENT sendtype, QString data)
 {
     data.prepend(" ");
     data.prepend(QString::number(sendtype));
     QByteArray msg = data.toStdString().c_str();
 
-    if(isConnected())
-    {
-        qDebug() << "[Debug] write size : " << intToArray(msg.size());
-        msg.prepend(intToArray(msg.size()));
-        qDebug() << "[Debug] write data : " << msg;
-        socket->write(msg);
-        return socket->waitForBytesWritten();
-    }
-    else
+    if(!isConnected())
     {
         return false;
     }
+
+    qDebug() << "[Debug] write size : " << intToArray(msg.size());
+    msg.prepend(intToArray(msg.size()));
+    qDebug() << "[Debug] write data : " << msg;
+    socket->write(msg);
+    return socket->waitForBytesWritten(TIMEOUT);
 }
 
 bool MessangerClient::writeforDebugging(QString data)
@@ -107,7 +118,32 @@ void MessangerClient::readMessage()
             {
                 emit resSubmit(protocol, strData);
             }
-
+            break;
+            case USERDATA_START:
+            {
+                user = new User(strData);
+            }
+            break;
+//            case SEND_PROFILE:
+//            {
+//                receivedProfile(strData);
+//            }
+//            break;
+            case SEND_FRIENDLIST:
+            {
+                receivedFriendList(strData);
+            }
+            break;
+//            case SEND_CHATROOMLIST:
+//            {
+//                receivedChatRoomList(strData);
+//            }
+//            break;
+            case USERDATA_END:
+            {
+                emit loginCompleted();
+            }
+            break;
         }
     }
 }
@@ -210,6 +246,20 @@ bool MessangerClient::requestLogin(QString nickname, QString password)
     return true;
 }
 
+void MessangerClient::requestUserData(QString nickname)
+{
+    writeData(REQUEST_USERDATA, nickname);
+}
+
+void MessangerClient::receivedFriendList(QString strData)
+{
+    QStringList list = strData.split(" ");
+    foreach(QString s, list)
+    {
+        user->addFriend(s);
+    }
+}
+
 void MessangerClient::error(int socketError, const QString &message)
 {
     switch(socketError)
@@ -228,17 +278,3 @@ void MessangerClient::error(int socketError, const QString &message)
         break;
     }
 }
-
-//QString MessangerClient::resLogin(PROTOCOL_SERVER protocol, QString data)
-//{
-//    if(protocol == LOGIN_SUCCESS)
-//    {
-//        // TODO : To change view from [Login] to [Chatlist]
-//        return "Login Success";
-//    }
-//    else
-//    {
-//        return data;
-//    }
-//}
-
