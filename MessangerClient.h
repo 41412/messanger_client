@@ -11,12 +11,6 @@
 #define TIMEOUT 5000
 #define SEPARATOR 1
 
-typedef int PROTOCOL_CLIENT;
-typedef int PROTOCOL_SERVER;
-
-enum { LOGIN_REQUEST = 0, SUBMIT_REQUEST = 1, REQUEST_USERDATA, FRIENDLIST_RECEIVED };     // PROTOCOL_CLIENT
-enum { LOGIN_SUCCESS = 0, LOGIN_FAIL = 1, SUBMIT_SUCCESS, SUBMIT_FAIL, USERDATA_START, USERDATA_END, SEND_FRIENDLIST };         // PROTOCOL_SERVER
-
 class MessangerClient : public QObject
 {
     Q_OBJECT
@@ -32,7 +26,7 @@ public:
 
     Q_INVOKABLE void requestUserData(QString nickname);
 
-    void receivedFriendList(QString strData);
+    void receivedFriendList(int friendlist_size, QString strData);
 
     // for debugging
     Q_INVOKABLE bool writeforDebugging(QString data);
@@ -41,8 +35,8 @@ public:
     Q_INVOKABLE void testsubmit();
 
 signals:
-    void resLogin(int protocol, QString data);
-    void resSubmit(int protocol, QString data);
+    void resLogin(QString protocol, QString data);
+    void resSubmit(QString protocol, QString data);
     void resFriendList(int protocol, QString data);
     void disconnected();
     void loginCompleted();
@@ -55,8 +49,8 @@ private:
     QTcpSocket *socket;
     User *user;
 
-    bool writeData(PROTOCOL_CLIENT sendtype);
-    bool writeData(PROTOCOL_CLIENT sendtype, QString data);
+    bool writeData(QString sendtype);
+    bool writeData(QString sendtype, QString data);
     bool isConnected();
     void printDebugMessage(QString msg);
 

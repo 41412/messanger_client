@@ -6,7 +6,7 @@ Item {
         id: text_nickname
         x: 25
         y: 10
-        scale: 15
+        font.pixelSize: 15
         text: "Nickname"
 //        text: user.getNickname()
     }
@@ -15,7 +15,7 @@ Item {
         id: text_introduce
         x: 25
         y: 60
-        scale: 12
+        font.pixelSize: 12
         text: "Introducing Message"
     }
 

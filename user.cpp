@@ -34,15 +34,26 @@ QString User::getProfileText()
 
 void User::setProfileText(QString text)
 {
-    this->profile_text = text;
+    profile_text = text;
 }
 
-void User::addFriend(QString username)
+int User::getFriendListSize()
 {
-    this->friend_list.push_back(username);
+    return friend_list.size();
 }
 
-//void User::deleteFriend(QString username)
-//{
-//    int index =
-//}
+QString User::getFriendName(int index)
+{
+    return friend_list.at(index).nickname;
+}
+
+QString User::getFriendProfile(int index)
+{
+    return friend_list.at(index).profile;
+}
+
+void User::addFriend(QString username, QString profile)
+{
+    struct UserFriend f = {username, profile};
+    friend_list.push_back(f);
+}

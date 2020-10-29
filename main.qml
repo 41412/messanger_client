@@ -49,20 +49,12 @@ Window {
         height: 700
     }
 
-    NavigationTab {
-        id: navigationtab
-        x: 0
-        y: 600
-        width: 500
-        height: 100
-    }
-
-    ProfileView {
-        id: profileview
+    ChatView {
+        id: chatview
         x: 0
         y: 0
         width: 500
-        height: 100
+        height: 600
     }
 
     ChatListView {
@@ -81,11 +73,19 @@ Window {
         height: 500
     }
 
-    ChatView {
-        id: chatview
+    ProfileView {
+        id: profileview
         x: 0
         y: 0
         width: 500
-        height: 600
+        height: 100
+    }
+
+    NavigationTab {
+        id: navigationtab
+        x: 0
+        y: 600
+        width: 500
+        height: 100
     }
 }

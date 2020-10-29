@@ -21,9 +21,9 @@ bool MessangerClient::isConnected()
     return (socket->state() == QAbstractSocket::ConnectedState);
 }
 
-bool MessangerClient::writeData(PROTOCOL_CLIENT sendtype)
+bool MessangerClient::writeData(QString sendtype)
 {
-    QByteArray msg = (QString::number(sendtype)).toStdString().c_str();
+    QByteArray msg = sendtype.toStdString().c_str();
     if(!isConnected())
     {
         return false;
@@ -34,10 +34,10 @@ bool MessangerClient::writeData(PROTOCOL_CLIENT sendtype)
     socket->write(msg);
     return socket->waitForBytesWritten(TIMEOUT);
 }
-bool MessangerClient::writeData(PROTOCOL_CLIENT sendtype, QString data)
+bool MessangerClient::writeData(QString sendtype, QString data)
 {
     data.prepend(" ");
-    data.prepend(QString::number(sendtype));
+    data.prepend(sendtype);
     QByteArray msg = data.toStdString().c_str();
 
     if(!isConnected())
@@ -75,7 +75,7 @@ void MessangerClient::testlogin()
 
 void MessangerClient::testsubmit()
 {
-    emit resSubmit(2, "[test] resSubmit");
+//    emit resSubmit(2, "[test] resSubmit");
 }
 
 void MessangerClient::readMessage()
@@ -96,54 +96,43 @@ void MessangerClient::readMessage()
         }
         int size = (readData.left(sizeof(int))).toInt();
         readData.remove(0, sizeof(int) + SEPARATOR);
-//        PROTOCOL_CLIENT protocol = (readData.left(sizeof(int))).toInt();
         QString strData = (QString::fromLocal8Bit(readData.data(), readData.size())).toUtf8();
-        PROTOCOL_CLIENT protocol = (strData.left(strData.indexOf(' '))).toInt();
+        QString protocol = strData.left(strData.indexOf(' '));
         strData.remove(0, strData.indexOf(' ') + SEPARATOR);
         qDebug() << "[Debug] size : " << size;
         qDebug() << "[Debug] protocol : " << protocol;
         qDebug() << "[Debug] data : " << strData;
 
-        switch(protocol)
+        if(protocol == "LOGIN_SUCCESS" || protocol == "LOGIN_FAIL")
         {
-            case LOGIN_SUCCESS:
-            case LOGIN_FAIL:
-            {
-                emit resLogin(protocol, strData);
-            }
-            break;
+            emit resLogin(protocol, strData);
+        }
+        else if(protocol == "SUBMIT_SUCCESS" || protocol == "SUBMIT_FAIL")
+        {
+            emit resSubmit(protocol, strData);
+        }
+        else if(protocol == "USERDATA_SEND_START")
+        {
+            user = new User(strData);
+            writeData("READY_TO_RECEIVE");
+        }
+        else if(protocol == "SEND_PROFILE")
+        {
 
-            case SUBMIT_SUCCESS:
-            case SUBMIT_FAIL:
-            {
-                emit resSubmit(protocol, strData);
-            }
-            break;
-            case USERDATA_START:
-            {
-                user = new User(strData);
-            }
-            break;
-//            case SEND_PROFILE:
-//            {
-//                receivedProfile(strData);
-//            }
-//            break;
-            case SEND_FRIENDLIST:
-            {
-                receivedFriendList(strData);
-            }
-            break;
-//            case SEND_CHATROOMLIST:
-//            {
-//                receivedChatRoomList(strData);
-//            }
-//            break;
-            case USERDATA_END:
-            {
-                emit loginCompleted();
-            }
-            break;
+        }
+        else if(protocol == "SEND_FRIENDLIST")
+        {
+            int friendlist_size = (strData.left(sizeof(int))).toInt();
+            strData.remove(0, strData.indexOf(' ') + SEPARATOR);
+            receivedFriendList(friendlist_size, strData);
+        }
+        else if(protocol == "SEND_CHATLIST")
+        {
+
+        }
+        else if(protocol == "USERDATA_SEND_END")
+        {
+            emit loginCompleted();
         }
     }
 }
@@ -202,18 +191,18 @@ void MessangerClient::requestSubmit(QString nickname, QString password, QString 
 {
     if(nickname == "" || password == "")
     {
-        emit resSubmit(SUBMIT_FAIL, "Nickname or Password is empty.");
+        emit resSubmit("SUBMIT_FAIL", "Nickname or Password is empty.");
         return;
     }
     if(password != confirm)
     {
-        emit resSubmit(SUBMIT_FAIL, "Both of password are NOT same.");
+        emit resSubmit("SUBMIT_FAIL", "Both of password are NOT same.");
         return;
     }
 
     if(!isConnected())
     {
-        emit resSubmit(SUBMIT_FAIL, "Server is no response.");
+        emit resSubmit("SUBMIT_FAIL", "Server is no response.");
         return;
     }
     else
@@ -221,7 +210,7 @@ void MessangerClient::requestSubmit(QString nickname, QString password, QString 
         QString data = nickname;
         data.append(" ");
         data.append(password);
-        writeData(SUBMIT_REQUEST, data);
+        writeData("REQUEST_SUBMIT", data);
     }
 }
 
@@ -229,34 +218,44 @@ bool MessangerClient::requestLogin(QString nickname, QString password)
 {
     if(nickname == "" || password == "")
     {
-        emit resLogin(LOGIN_FAIL, "Nickname or Password is empty.");
+        emit resLogin("LOGIN_FAIL", "Nickname or Password is empty.");
         return false;
     }
 
     if(!isConnected())
     {
-        emit resLogin(LOGIN_FAIL, "Server is no response.");
+        emit resLogin("LOGIN_FAIL", "Server is no response.");
         return false;
     }
 
     QString data = nickname;
     data.append(" ");
     data.append(password);
-    writeData(LOGIN_REQUEST, data);
+    writeData("REQUEST_LOGIN", data);
     return true;
 }
 
 void MessangerClient::requestUserData(QString nickname)
 {
-    writeData(REQUEST_USERDATA, nickname);
+    writeData("REQUEST_USERDATA", nickname);
 }
 
-void MessangerClient::receivedFriendList(QString strData)
+void MessangerClient::receivedFriendList(int friendlist_size, QString strData)
 {
     QStringList list = strData.split(" ");
-    foreach(QString s, list)
+    qDebug() << "[Debug] received size : " << friendlist_size;
+    qDebug() << "[Debug] real size : " << list.size();
+    if(friendlist_size != list.size())
     {
-        user->addFriend(s);
+        writeData("DATA_ERROR");
+    }
+    else
+    {
+        foreach(QString s, list)
+        {
+            user->addFriend(s, "소개말");
+        }
+        writeData("FRIENDLIST_RECEIVED");
     }
 }
 

@@ -31,12 +31,12 @@ Item {
     Connections {
         target: messangerclient
         onResLogin: {
-            if(protocol === 0) {
+            if(protocol === "LOGIN_SUCCESS") {
                 // TODO : change view from Loginview to Chatlistview
 //                messangerclient.loadingUserData(textfield_nickname.text)
                 messangerclient.requestUserData(textfield_nickname.text)
             }
-            else if(protocol === 1) {
+            else if(protocol === "LOGIN_FAIL") {
                 text_error_loginwindow.text = data
                 messangerclient.clientDisconnect()
             }
@@ -44,11 +44,11 @@ Item {
         }
 
         onResSubmit: {
-            if(protocol === 2) {
+            if(protocol === "SUBMIT_SUCCESS") {
                 resetSubmitWindow()
                 popup_submit_success.open()
             }
-            else if(protocol === 3) {
+            else if(protocol === "SUBMIT_FAIL") {
                 text_error_submitwindow.text = data
                 messangerclient.clientDisconnect()
             }
