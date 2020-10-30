@@ -17,13 +17,6 @@ Item {
             width: 500
             height: 100
 
-            Rectangle {
-                id: friend_box
-                width: parent.width
-                height: parent.height
-                color: "white"
-            }
-
             Text {
                 id: text_friend_nickname
                 y: 0
@@ -39,6 +32,23 @@ Item {
                 anchors.leftMargin: 25
                 text: friendlist_profile
             }
+
+            Rectangle {
+                id: friend_box
+                width: parent.width
+                anchors.bottom: parent.bottom
+                height: 1
+                color: "black"
+            }
+
+            MouseArea {
+                id: mousearea_friend
+                anchors.fill: parent
+
+                onClicked: {
+                    listview_friendlist.currentIndex = index
+                }
+            }
         }
     }
 
@@ -47,7 +57,10 @@ Item {
         anchors.fill: parent
         model: ListModel{}
         delegate: friendlistDelegate
-        highlight: Rectangle { color: "yellow"; radius: 5 }
+        highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
+        highlightFollowsCurrentItem: true
+        highlightMoveDuration: 20
+        highlightMoveVelocity: 2000
         focus: true
     }
 }

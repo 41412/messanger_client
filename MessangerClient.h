@@ -26,7 +26,7 @@ public:
 
     Q_INVOKABLE void requestUserData(QString nickname);
 
-    void receivedFriendList(int friendlist_size, QString strData);
+    void receivedFriendList(int received_size, QString strData);
 
     // for debugging
     Q_INVOKABLE bool writeforDebugging(QString data);

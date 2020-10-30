@@ -32,10 +32,10 @@ QString User::getProfileText()
     return profile_text;
 }
 
-void User::setProfileText(QString text)
-{
-    profile_text = text;
-}
+//void User::setProfileText(QString text)
+//{
+//    profile_text = text;
+//}
 
 int User::getFriendListSize()
 {

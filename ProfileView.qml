@@ -2,6 +2,12 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 
 Item {
+
+    Rectangle {
+        anchors.fill: parent
+        color: "cornsilk"
+    }
+
     Text {
         id: text_nickname
         x: 25

@@ -6,7 +6,6 @@ MessangerClient::MessangerClient()
     qmlRegisterType<MessangerClient>("MessangerClient", 1, 0, "MessangerClient");
 
     connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
-
 //    connect(socket, SIGNAL(error(int, QString)), this, SLOT(error(int, QString)));
 }
 
@@ -29,6 +28,7 @@ bool MessangerClient::writeData(QString sendtype)
         return false;
     }
     qDebug() << "[Debug] write size : " << intToArray(msg.size());
+    msg.prepend(" ");
     msg.prepend(intToArray(msg.size()));
     qDebug() << "[Debug] write data : " << msg;
     socket->write(msg);
@@ -46,6 +46,7 @@ bool MessangerClient::writeData(QString sendtype, QString data)
     }
 
     qDebug() << "[Debug] write size : " << intToArray(msg.size());
+    msg.prepend(" ");
     msg.prepend(intToArray(msg.size()));
     qDebug() << "[Debug] write data : " << msg;
     socket->write(msg);
@@ -89,12 +90,12 @@ void MessangerClient::readMessage()
         }
         qDebug() << "[Debug] rawdata : " << readData;
         int index = 0;
-        while(readData.at(index) == '\0')
-        {
-            readData[index] = '0';
-            index++;
-        }
-        int size = (readData.left(sizeof(int))).toInt();
+//        while(readData.at(index) == '\0')
+//        {
+//            readData[index] = '0';
+//            index++;
+//        }
+        int size = static_cast<int>(readData.at(0));
         readData.remove(0, sizeof(int) + SEPARATOR);
         QString strData = (QString::fromLocal8Bit(readData.data(), readData.size())).toUtf8();
         QString protocol = strData.left(strData.indexOf(' '));
@@ -122,9 +123,9 @@ void MessangerClient::readMessage()
         }
         else if(protocol == "SEND_FRIENDLIST")
         {
-            int friendlist_size = (strData.left(sizeof(int))).toInt();
-            strData.remove(0, strData.indexOf(' ') + SEPARATOR);
-            receivedFriendList(friendlist_size, strData);
+            int received_size = (strData.left(sizeof(int))).toInt();
+            strData.remove(0, sizeof(int) + SEPARATOR);
+            receivedFriendList(received_size, strData);
         }
         else if(protocol == "SEND_CHATLIST")
         {
@@ -240,12 +241,13 @@ void MessangerClient::requestUserData(QString nickname)
     writeData("REQUEST_USERDATA", nickname);
 }
 
-void MessangerClient::receivedFriendList(int friendlist_size, QString strData)
+void MessangerClient::receivedFriendList(int received_size, QString strData)
 {
-    QStringList list = strData.split(" ");
-    qDebug() << "[Debug] received size : " << friendlist_size;
-    qDebug() << "[Debug] real size : " << list.size();
-    if(friendlist_size != list.size())
+    QStringList list = strData.split(' ');
+    int real_size = strData.split(' ').length();
+    qDebug() << "[Debug] received size : " << received_size;
+    qDebug() << "[Debug] real size : " << real_size;
+    if(received_size != list.size())
     {
         writeData("DATA_ERROR");
     }

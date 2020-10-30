@@ -349,5 +349,21 @@ Item {
                 }
             }
         }
+
+//        CheckBox {
+//            id: checkbox_debug_debugger
+//            x: 350
+//            y: 60
+//            text: "Link Debugger"
+
+//            onCheckStateChanged: {
+//                if(checkbox_debug_localhost.checkState === Qt.Checked) {
+//                    hostIP = "192.168.10.102"
+//                }
+//                else if(checkbox_debug_localhost.checkState === Qt.Unchecked) {
+//                    hostIP = "192.168.10.200"
+//                }
+//            }
+//        }
     }
 }
