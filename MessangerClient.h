@@ -20,6 +20,7 @@ public:
     ~MessangerClient();
 
     QByteArray intToArray(qint32 source);
+    Q_INVOKABLE bool isConnected();
     Q_INVOKABLE void connectToHost(QString host, quint16 port);
     Q_INVOKABLE void requestSubmit(QString nickname, QString password, QString confirm);
     Q_INVOKABLE bool requestLogin(QString nickname, QString password);
@@ -29,7 +30,6 @@ public:
     void receivedFriendList(int received_size, QString strData);
 
     // for debugging
-    Q_INVOKABLE bool writeforDebugging(QString data);
     Q_INVOKABLE void clientDisconnect();
     Q_INVOKABLE void testlogin();
     Q_INVOKABLE void testsubmit();
@@ -51,10 +51,12 @@ private:
 
     bool writeData(QString sendtype);
     bool writeData(QString sendtype, QString data);
-    bool isConnected();
+
     void printDebugMessage(QString msg);
 
-//    QString addString(QString target, int num, QString ...);
+    int extractSizeToPacket(QByteArray &packet);
+    QString extractProtocolToPacket(QByteArray &packet);
+    QString extractDataToPacket(QByteArray &packet);
 
 private slots:
     void error(int socketError, const QString &message);

@@ -32,10 +32,10 @@ QString User::getProfileText()
     return profile_text;
 }
 
-//void User::setProfileText(QString text)
-//{
-//    profile_text = text;
-//}
+void User::setProfileText(QString text)
+{
+    profile_text = text;
+}
 
 int User::getFriendListSize()
 {
@@ -54,6 +54,6 @@ QString User::getFriendProfile(int index)
 
 void User::addFriend(QString username, QString profile)
 {
-    struct UserFriend f = {username, profile};
-    friend_list.push_back(f);
+    UserFriend f = {username, profile};
+    friend_list.append(f);
 }

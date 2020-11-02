@@ -5,6 +5,7 @@
 #include <QQmlEngine>
 
 struct UserFriend {
+    UserFriend(QString nickname, QString profile) : nickname(nickname), profile(profile) {}
     QString nickname;
     QString profile;
 };
@@ -20,7 +21,7 @@ public:
 
     Q_INVOKABLE QString getNickname();
     Q_INVOKABLE QString getProfileText();
-//    Q_INVOKABLE void setProfileText(QString);
+    Q_INVOKABLE void setProfileText(QString);
     Q_INVOKABLE int getFriendListSize();
     Q_INVOKABLE QString getFriendName(int index);
     Q_INVOKABLE QString getFriendProfile(int index);

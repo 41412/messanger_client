@@ -33,12 +33,10 @@ Item {
         onResLogin: {
             if(protocol === "LOGIN_SUCCESS") {
                 // TODO : change view from Loginview to Chatlistview
-//                messangerclient.loadingUserData(textfield_nickname.text)
                 messangerclient.requestUserData(textfield_nickname.text)
             }
             else if(protocol === "LOGIN_FAIL") {
                 text_error_loginwindow.text = data
-                messangerclient.clientDisconnect()
             }
             eraseLoginInfo()
         }
@@ -50,7 +48,6 @@ Item {
             }
             else if(protocol === "SUBMIT_FAIL") {
                 text_error_submitwindow.text = data
-                messangerclient.clientDisconnect()
             }
         }
 
@@ -131,7 +128,7 @@ Item {
             text: "등록"
 
             onClicked: {
-                messangerclient.connectToHost(hostIP, portNumber)
+//                messangerclient.connectToHost(hostIP, portNumber)
                 messangerclient.requestSubmit(textfield_submit_nickname.text, textfield_submit_password.text, textfield_submit_confirm.text)
             }
         }
@@ -179,7 +176,6 @@ Item {
             onClicked: {
                 popup_submit.close()
                 popup_submit_success.close()
-                messangerclient.clientDisconnect()
             }
         }
     }
@@ -234,7 +230,7 @@ Item {
         text: "로그인"
 
         onClicked: {
-            messangerclient.connectToHost(hostIP, portNumber)
+//            messangerclient.connectToHost(hostIP, portNumber)
             messangerclient.requestLogin(textfield_nickname.text, textfield_password.text)
         }
     }
@@ -277,32 +273,16 @@ Item {
         }
 
         Button {
-            id: test_connectbutton
+            id: test_loginmyip
 
             x: 150
             y: 600
             width: 100
             height: 50
-            text:"Connect"
+            text: "login this IP"
 
             onClicked: {
-                if(messangerclient.connectToHost(hostIP, portNumber)) {
-                    messangerclient.writeforDebugging(testfield.text)
-                }
-            }
-        }
-
-        Button {
-            id: test_closebutton
-
-            x: 150
-            y: 650
-            width: 100
-            height: 50
-            text:"Disconnect"
-
-            onClicked: {
-                messangerclient.clientDisconnect()
+                messangerclient.connectToHost("192.168.10.194", 35000)
             }
         }
 
@@ -350,20 +330,18 @@ Item {
             }
         }
 
-//        CheckBox {
-//            id: checkbox_debug_debugger
-//            x: 350
-//            y: 60
-//            text: "Link Debugger"
+        Text {
+            id: text_connectstate
+            x: 10
+            y: 10
 
-//            onCheckStateChanged: {
-//                if(checkbox_debug_localhost.checkState === Qt.Checked) {
-//                    hostIP = "192.168.10.102"
-//                }
-//                else if(checkbox_debug_localhost.checkState === Qt.Unchecked) {
-//                    hostIP = "192.168.10.200"
-//                }
-//            }
-//        }
+            color: "Red"
+            text: ""
+
+            Component.onCompleted: {
+                color = Qt.binding(function() { return messangerclient.isConnected() ? "Green" : "Red" })
+                text = Qt.binding(function() { return messangerclient.isConnected() ? "● Open" : "● Close" })
+            }
+        }
     }
 }

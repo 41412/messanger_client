@@ -56,6 +56,7 @@ Item {
         id: listview_friendlist
         anchors.fill: parent
         model: ListModel{}
+//        model: user.friend_list   고려해볼것
         delegate: friendlistDelegate
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         highlightFollowsCurrentItem: true
