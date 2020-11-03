@@ -1,7 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <MessangerClient.h>
-#include <user.h>
+#include <McUser.h>
+#include <mcdebug.h>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QTextCodec>
@@ -12,14 +13,19 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    MessangerClient *messangerclient = new MessangerClient();
-    User *u = new User();
+    qmlRegisterType<MessangerClient>("MessangerClient", 1, 0, "MessangerClient");
+    qmlRegisterType<McUser>("McUser", 1, 0, "McUser");
+    qmlRegisterType<McDebug>("McDebug", 1, 0, "McDebug");
 
     QQuickStyle::setStyle("Material");
 
     QQmlApplicationEngine engine;
 
-    engine.rootContext()->setContextProperty("messangerclient", messangerclient);
+    McUser mcuser;
+    MessangerClient messangerclient(&mcuser);
+
+    engine.rootContext()->setContextProperty("messangerclient", &messangerclient);
+    engine.rootContext()->setContextProperty("mcuser", &mcuser);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

@@ -13,8 +13,7 @@ Item {
         x: 25
         y: 10
         font.pixelSize: 15
-        text: "Nickname"
-//        text: user.getNickname()
+        text: mcuser.nickname
     }
 
     Text {
@@ -35,7 +34,7 @@ Item {
         text: "로그아웃"
 
         onClicked: {
-            messangerclient.clientDisconnect()
+//            messangerclient.clientDisconnect()
         }
     }
 }

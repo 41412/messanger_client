@@ -6,7 +6,8 @@
 #include <QtNetwork>
 #include <QDebug>
 #include <stdarg.h>
-#include <user.h>
+#include <McUser.h>
+#include <McDebug.h>
 
 #define TIMEOUT 5000
 #define SEPARATOR 1
@@ -15,8 +16,11 @@ class MessangerClient : public QObject
 {
     Q_OBJECT
 
+    Q_PROPERTY(McUser *mcuser )
+
 public:
-    MessangerClient();
+    MessangerClient(QObject* parent = nullptr);
+    MessangerClient(McUser *mcuser);
     ~MessangerClient();
 
     QByteArray intToArray(qint32 source);
@@ -27,12 +31,12 @@ public:
 
     Q_INVOKABLE void requestUserData(QString nickname);
 
+    Q_INVOKABLE void requestLogout(QString nickname);
+
     void receivedFriendList(int received_size, QString strData);
 
     // for debugging
     Q_INVOKABLE void clientDisconnect();
-    Q_INVOKABLE void testlogin();
-    Q_INVOKABLE void testsubmit();
 
 signals:
     void resLogin(QString protocol, QString data);
@@ -47,7 +51,8 @@ public slots:
 
 private:
     QTcpSocket *socket;
-    User *user;
+    McUser *mcuser;
+    McDebug *debugger;
 
     bool writeData(QString sendtype);
     bool writeData(QString sendtype, QString data);

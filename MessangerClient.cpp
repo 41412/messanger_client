@@ -1,15 +1,18 @@
 #include "MessangerClient.h"
 
-MessangerClient::MessangerClient()
+MessangerClient::MessangerClient(McUser *mcuser)
+    : QObject(), socket(new QTcpSocket(this)), mcuser(mcuser), debugger(new McDebug())
 {
-    socket = new QTcpSocket(this);
-    qmlRegisterType<MessangerClient>("MessangerClient", 1, 0, "MessangerClient");
-
     connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
 //    connect(socket, SIGNAL(error(int, QString)), this, SLOT(error(int, QString)));
 
 //    connectToHost("192.168.10.200", 35000);
     connectToHost("192.168.10.194", 35000);
+}
+MessangerClient::MessangerClient(QObject* parent)
+    : QObject(parent), socket(new QTcpSocket(this)), mcuser(nullptr), debugger(new McDebug())
+{
+
 }
 
 MessangerClient::~MessangerClient()
@@ -30,10 +33,11 @@ bool MessangerClient::writeData(QString sendtype)
     {
         return false;
     }
-    qDebug() << "[Debug] write size : " << intToArray(msg.size());
+
+    debugger->debugMessage("write size", intToArray(msg.size()));
     msg.prepend(" ");
     msg.prepend(intToArray(msg.size()));
-    qDebug() << "[Debug] write data : " << msg;
+    debugger->debugMessage("write data", msg);
     socket->write(msg);
     return socket->waitForBytesWritten(TIMEOUT);
 }
@@ -48,40 +52,28 @@ bool MessangerClient::writeData(QString sendtype, QString data)
         return false;
     }
 
-    qDebug() << "[Debug] write size : " << intToArray(msg.size());
+    debugger->debugMessage("write size", intToArray(msg.size()));
     msg.prepend(" ");
     msg.prepend(intToArray(msg.size()));
-    qDebug() << "[Debug] write data : " << msg;
+    debugger->debugMessage("write data", msg);
     socket->write(msg);
     return socket->waitForBytesWritten(TIMEOUT);
-}
-
-void MessangerClient::testlogin()
-{
-    emit resLogin(0, "[Test] resLogin");
-}
-
-void MessangerClient::testsubmit()
-{
-//    emit resSubmit(2, "[test] resSubmit");
 }
 
 void MessangerClient::readMessage()
 {
     if(socket->bytesAvailable() >= 0)
     {
-        QByteArray readData = socket->readAll();
-        if(readData.size() < 1) {
-            qDebug() << "[Debug] packet has no data.";
+        QByteArray rawdata = socket->readAll();
+        if(rawdata.size() < 1) {
+            debugger->debugMessage("packet has no data.");
             return;
         }
-        qDebug() << "[Debug] rawdata : " << readData;
-        int size = extractSizeToPacket(readData);
-        QString protocol = extractProtocolToPacket(readData);
-        QString data = extractDataToPacket(readData);
-        qDebug() << "[Debug] size : " << size;
-        qDebug() << "[Debug] protocol : " << protocol;
-        qDebug() << "[Debug] data : " << data;
+
+        debugger->debugMessage("rawdata", rawdata);
+        int size = extractSizeToPacket(rawdata);
+        QString protocol = extractProtocolToPacket(rawdata);
+        QString data = extractDataToPacket(rawdata);
 
         if(protocol == "LOGIN_SUCCESS" || protocol == "LOGIN_FAIL")
         {
@@ -93,7 +85,6 @@ void MessangerClient::readMessage()
         }
         else if(protocol == "USERDATA_SEND_START")
         {
-            user = new User(data);
             writeData("READY_TO_RECEIVE");
         }
         else if(protocol == "SEND_PROFILE")
@@ -130,7 +121,7 @@ void MessangerClient::clientDisconnect()
 {
     socket->disconnectFromHost();
     emit disconnected();
-    qDebug() << "[Debug] socket is disconnected.";
+    debugger->debugMessage("socket is disconnected.");
 }
 
 void MessangerClient::connectToHost(QString host, quint16 port)
@@ -195,15 +186,22 @@ bool MessangerClient::requestLogin(QString nickname, QString password)
 
 void MessangerClient::requestUserData(QString nickname)
 {
+
     writeData("REQUEST_USERDATA", nickname);
+}
+
+void MessangerClient::requestLogout(QString nickname)
+{
+//    user
 }
 
 void MessangerClient::receivedFriendList(int received_size, QString strData)
 {
     QStringList list = strData.split(' ');
     int real_size = strData.split(' ').length();
-    qDebug() << "[Debug] received size : " << received_size;
-    qDebug() << "[Debug] real size : " << real_size;
+    debugger->debugMessage("received_size", received_size);
+    debugger->debugMessage("real_size", real_size);
+
     if(received_size != list.size())
     {
         writeData("DATA_ERROR");
@@ -212,7 +210,7 @@ void MessangerClient::receivedFriendList(int received_size, QString strData)
     {
         foreach(QString s, list)
         {
-            user->addFriend(s, "소개말");
+            mcuser->addFriend(s, "소개말");
         }
         writeData("FRIENDLIST_RECEIVED");
     }
@@ -223,6 +221,7 @@ int MessangerClient::extractSizeToPacket(QByteArray &packet)
     bool ok;
     int size = packet.mid(0, sizeof(int)).toHex().toInt(&ok, 16);
     packet.remove(0, sizeof(int) + SEPARATOR);
+    debugger->debugMessage("size", size);
     return size;
 }
 
@@ -232,18 +231,22 @@ QString MessangerClient::extractProtocolToPacket(QByteArray &packet)
     if(packet.indexOf(' ') == -1)
     {
         protocol = packet;
+        packet = "";
     }
     else
     {
         protocol = packet.left(packet.indexOf(' '));
         packet.remove(0, packet.indexOf(' ') + SEPARATOR);
     }
+    debugger->debugMessage("protocol", protocol);
     return protocol;
 }
 
 QString MessangerClient::extractDataToPacket(QByteArray &packet)
 {
-    return QString::fromLocal8Bit(packet.data(), packet.size()).toUtf8();
+    QString data = QString::fromLocal8Bit(packet.data(), packet.size()).toUtf8();
+    debugger->debugMessage("data", data);
+    return data;
 }
 
 void MessangerClient::error(int socketError, const QString &message)

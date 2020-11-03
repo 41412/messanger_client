@@ -4,9 +4,9 @@ import QtQuick.Controls 2.13
 Item {
 
     Component.onCompleted: {
-        for(var i = 0; i < user.getFriendListSize(); i++) {
-            listview_friendlist.model.append({ "friendlist_nickname": user.getFriendName(i),
-                                                 "friendlist_profile": user.getFriendProfile(i) })
+        for(var i = 0; i < mcuser.getFriendListSize(); i++) {
+            listview_friendlist.model.append({ "friendlist_nickname": mcuser.getFriendName(i),
+                                                 "friendlist_profile": mcuser.getFriendProfile(i) })
         }
     }
 
@@ -56,7 +56,7 @@ Item {
         id: listview_friendlist
         anchors.fill: parent
         model: ListModel{}
-//        model: user.friend_list   고려해볼것
+//        model: mcuser.friend_list   고려해볼것
         delegate: friendlistDelegate
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         highlightFollowsCurrentItem: true

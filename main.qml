@@ -1,7 +1,8 @@
 import QtQuick 2.13
 import QtQuick.Window 2.13
 import MessangerClient 1.0
-import User 1.0
+import McUser 1.0
+import McDebug 1.0
 
 Window {
     visible: true
@@ -9,17 +10,10 @@ Window {
     height: 700
     title: qsTr("Messanger")
 
-    property string currentState: ""
+    property string currentState: "LOGIN_VIEW"
 
     Component.onCompleted: {
-        currentState = "LOGIN_VIEW"
 
-        loginwindow.visible = Qt.binding(function() { return currentState === "LOGIN_VIEW" })
-        navigationtab.visible = Qt.binding(function() { return currentState !== "LOGIN_VIEW" })
-        profileview.visible = Qt.binding(function() { return currentState !== "LOGIN_VIEW" && currentState !== "CHAT_VIEW" })
-        chatlistview.visible = Qt.binding(function() { return currentState === "CHATLIST_VIEW" })
-        friendlistview.visible = Qt.binding(function() { return currentState === "FRIENDLIST_VIEW" })
-        chatview.visible = Qt.binding(function() { return currentState === "CHAT_VIEW" })
     }
 
     onCurrentStateChanged: {
@@ -33,12 +27,16 @@ Window {
         }
     }
 
-    MessangerClient {
-        id: messangerclient
-    }
+//    MessangerClient {
+//        id: messangerclient
+//    }
 
-    User {
-        id: user
+//    McUser {
+//        id: mcuser
+//    }
+
+    McDebug {
+        id: mcdebug
     }
 
     LoginWindow {
@@ -47,6 +45,7 @@ Window {
         y: 0
         width: 500
         height: 700
+        visible: currentState === "LOGIN_VIEW"
     }
 
     ChatView {
@@ -55,6 +54,7 @@ Window {
         y: 0
         width: 500
         height: 600
+        visible: currentState === "CHAT_VIEW"
     }
 
     ChatListView {
@@ -63,6 +63,7 @@ Window {
         y: 100
         width: 500
         height: 500
+        visible: currentState === "CHATLIST_VIEW"
     }
 
     FriendListView {
@@ -71,6 +72,7 @@ Window {
         y: 100
         width: 500
         height: 500
+        visible: currentState === "FRIENDLIST_VIEW"
     }
 
     ProfileView {
@@ -79,6 +81,7 @@ Window {
         y: 0
         width: 500
         height: 100
+        visible: (currentState === "CHATLIST_VIEW" || currentState === "FRIENDLIST_VIEW")
     }
 
     NavigationTab {
@@ -87,5 +90,6 @@ Window {
         y: 600
         width: 500
         height: 100
+        visible: currentState !== "LOGIN_VIEW"
     }
 }

@@ -34,6 +34,7 @@ Item {
             if(protocol === "LOGIN_SUCCESS") {
                 // TODO : change view from Loginview to Chatlistview
                 messangerclient.requestUserData(textfield_nickname.text)
+                mcuser.nickname = textfield_nickname.text
             }
             else if(protocol === "LOGIN_FAIL") {
                 text_error_loginwindow.text = data
@@ -53,6 +54,7 @@ Item {
 
         onLoginCompleted: {
             currentState = "CHATLIST_VIEW"
+//            text컴포넌트이름.nickname = mcuser.getnickname() 업데이트 하려면?
         }
     }
 
@@ -272,19 +274,19 @@ Item {
             this.visible = false
         }
 
-        Button {
-            id: test_loginmyip
+//        Button {
+//            id: test_loginmyip
 
-            x: 150
-            y: 600
-            width: 100
-            height: 50
-            text: "login this IP"
+//            x: 150
+//            y: 600
+//            width: 100
+//            height: 50
+//            text: "login this IP"
 
-            onClicked: {
-                messangerclient.connectToHost("192.168.10.194", 35000)
-            }
-        }
+//            onClicked: {
+//                messangerclient.connectToHost("192.168.10.194", 35000)
+//            }
+//        }
 
         Button {
             id: test_resloginsignal
@@ -296,7 +298,7 @@ Item {
             text: "Login Signal"
 
             onClicked: {
-                messangerclient.testlogin()
+                mcdebug.testlogin()
             }
         }
 
@@ -310,7 +312,7 @@ Item {
             text: "Submit Signal"
 
             onClicked: {
-                messangerclient.testsubmit()
+                mcdebug.testsubmit()
             }
         }
 
