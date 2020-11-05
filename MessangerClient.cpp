@@ -37,55 +37,50 @@ void MessangerClient::readMessage()
             debugger->debugMessage("Invalid Data");
             return;
         }
-        if(!McPacket::isValidHeaderPacket(rawdata.mid(0, 8)))
-        {
-            debugger->debugMessage("Invalid Data");
-            return;
-        }
 
-        McPacket::removeHeader(rawdata);
-        packet->extractReadPacket(rawdata);
 
-        if(packet->getProtocol() == "LOGIN_SUCCESS" || packet->getProtocol() == "LOGIN_FAIL")
-        {
-            emit resLogin(packet->getProtocol(), packet->getData());
-        }
-        else if(packet->getProtocol() == "SUBMIT_SUCCESS" || packet->getProtocol() == "SUBMIT_FAIL")
-        {
-            emit resSubmit(packet->getProtocol(), packet->getData());
-        }
-        else if(packet->getProtocol() == "USERDATA_SEND_START")
-        {
-            McPacket::writePacket(socket, "READY_TO_RECEIVE");
-        }
-        else if(packet->getProtocol() == "SEND_PROFILE")
-        {
 
-        }
-        else if(packet->getProtocol() == "SEND_FRIENDLIST")
+        if(McPacket::isNewPacket(rawdata.mid(0, 8)))
         {
-            int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
-            packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
-            receivedFriendList(received_size, packet->getData());
-        }
-        else if(packet->getProtocol() == "SEND_CHATLIST")
-        {
+            packet->removeHeader(rawdata);
+            packet->extractReadPacket(rawdata);
 
+            if(packet->getProtocol() == "LOGIN_SUCCESS" || packet->getProtocol() == "LOGIN_FAIL")
+            {
+                emit resLogin(packet->getProtocol(), packet->getData());
+            }
+            else if(packet->getProtocol() == "SUBMIT_SUCCESS" || packet->getProtocol() == "SUBMIT_FAIL")
+            {
+                emit resSubmit(packet->getProtocol(), packet->getData());
+            }
+            else if(packet->getProtocol() == "USERDATA_SEND_START")
+            {
+                McPacket::writePacket(socket, "READY_TO_RECEIVE");
+            }
+            else if(packet->getProtocol() == "SEND_PROFILE")
+            {
+
+            }
+            else if(packet->getProtocol() == "SEND_FRIENDLIST")
+            {
+                int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
+                packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
+                receivedFriendList(received_size, packet->getData());
+            }
+            else if(packet->getProtocol() == "SEND_CHATLIST")
+            {
+
+            }
+            else if(packet->getProtocol() == "USERDATA_SEND_END")
+            {
+                emit loginCompleted();
+            }
         }
-        else if(packet->getProtocol() == "USERDATA_SEND_END")
+        else
         {
-            emit loginCompleted();
+            packet->extractReadPacketData(rawdata);
         }
     }
-}
-
-QByteArray MessangerClient::intToArray(qint32 source)
-{
-    // Avoid use of cast, this is the Qt way to serialize objects
-    QByteArray temp;
-    QDataStream data(&temp, QIODevice::ReadWrite);
-    data << source;
-    return temp;
 }
 
 void MessangerClient::clientDisconnect()

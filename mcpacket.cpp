@@ -1,6 +1,6 @@
 #include "mcpacket.h"
 
-McPacket::McPacket()
+McPacket::McPacket() : isReceiving(false)
 {
 
 }
@@ -10,19 +10,41 @@ McPacket::~McPacket()
 
 }
 
+void McPacket::removeHeader(QByteArray &packet)
+{
+    packet.remove(0, 8);
+}
+
 void McPacket::extractReadPacket(QByteArray &packet)
 {
-    extractReadPacketSize(packet);
+    extractReadPacketTotalSize(packet);
     extractReadPacketProtocol(packet);
     extractReadPacketData(packet);
 }
 
-void McPacket::extractReadPacketSize(QByteArray &packet)
+void McPacket::extractReadPacketTotalSize(QByteArray &packet)
 {
     bool ok;
-    int size = packet.mid(0, sizeof(int)).toHex().toInt(&ok, 16);
+    totalsize = packet.mid(0, sizeof(int)).toHex().toInt(&ok, 16);
+    remainsize = totalsize;
     packet.remove(0, sizeof(int));
-    debugger->debugMessage("size", size);
+    debugger->debugMessage("Total Size", totalsize);
+    remainsize -= sizeof(int);
+}
+
+int McPacket::getTotalSize()
+{
+    return totalsize;
+}
+
+void McPacket::setRemainSize(int size)
+{
+    this->remainsize = size;
+}
+
+int McPacket::getRemainSize()
+{
+    return remainsize;
 }
 
 void McPacket::extractReadPacketProtocol(QByteArray &packet)
@@ -31,11 +53,13 @@ void McPacket::extractReadPacketProtocol(QByteArray &packet)
     {
         protocol = packet;
         packet = "";
+        remainsize -= protocol.size();
     }
     else
     {
         protocol = packet.left(packet.indexOf(' '));
         packet.remove(0, packet.indexOf(' ') + SEPARATOR);
+        remainsize -= (protocol.size() + SEPARATOR);
     }
     debugger->debugMessage("protocol", protocol);
 }
@@ -46,7 +70,9 @@ QString McPacket::getProtocol()
 
 void McPacket::extractReadPacketData(QByteArray &packet)
 {
-    data = QString::fromLocal8Bit(packet.data(), packet.size()).toUtf8();
+    int readsize = (packet.size() < remainsize) ? remainsize : packet.size();
+    data = QString::fromLocal8Bit(packet.data(), readsize).toUtf8();
+    remainsize -= readsize;
     debugger->debugMessage("data", data);
 }
 QString McPacket::getData()

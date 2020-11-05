@@ -13,12 +13,18 @@ class McPacket : public QObject
 {
 
 public:
+    bool isReceiving;
+
     explicit McPacket();
     virtual ~McPacket();
 
+    void removeHeader(QByteArray &packet);
     void extractReadPacket(QByteArray &packet);
-
-    void extractReadPacketSize(QByteArray &packet);
+    void extractReadPacketTotalSize(QByteArray &packet);
+    int getTotalSize();
+    void setTotalSize(int size);
+    int getRemainSize();
+    void setRemainSize(int size);
     void extractReadPacketProtocol(QByteArray &packet);
     QString getProtocol();
     void extractReadPacketData(QByteArray &packet);
@@ -50,14 +56,11 @@ public:
     {
         return packet.size() > 0;
     }
-    static bool isValidHeaderPacket(QByteArray header)
+    static bool isNewPacket(QByteArray header)
     {
         return memcmp(header.constData(), PACKET_HEAD, 8) == 0;
     }
-    static QByteArray removeHeader(QByteArray &packet)
-    {
-        return packet.remove(0, 8);
-    }
+
     static bool isConnected(QTcpSocket *socket)
     {
         return (socket->state() == QAbstractSocket::ConnectedState);
@@ -73,7 +76,8 @@ public:
 
 private:
     McDebug *debugger;
-    int size;
+    int totalsize;
+    int remainsize;
     QString protocol;
     QString data;
 };
