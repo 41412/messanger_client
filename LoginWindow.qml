@@ -54,6 +54,8 @@ Item {
 
         onLoginCompleted: {
             currentState = "CHATLIST_VIEW"
+            profileview.nickname = mcuser.nickname
+            profileview.introduce = mcuser.profile_text
 //            text컴포넌트이름.nickname = mcuser.getnickname() 업데이트 하려면?
         }
     }
@@ -274,19 +276,30 @@ Item {
             this.visible = false
         }
 
-//        Button {
-//            id: test_loginmyip
+        TextField {
+            id: test_hostip
 
-//            x: 150
-//            y: 600
-//            width: 100
-//            height: 50
-//            text: "login this IP"
+            x: 10
+            y: 10
+            width: 150
+            height: 50
+            placeholderText: "IP Address"
+        }
 
-//            onClicked: {
-//                messangerclient.connectToHost("192.168.10.194", 35000)
-//            }
-//        }
+        Button {
+            id: test_reconnect
+
+            x: 150
+            y: 600
+            width: 100
+            height: 50
+            text: "Reconnect"
+
+            onClicked: {
+                messangerclient.clientDisconnect()
+                messangerclient.connectToHost(test_hostip.text, 35000)
+            }
+        }
 
         Button {
             id: test_resloginsignal
@@ -316,22 +329,6 @@ Item {
             }
         }
 
-        CheckBox {
-            id: checkbox_debug_localhost
-            x: 350
-            y: 0
-            text: "Link Localhost"
-
-            onCheckStateChanged: {
-                if(checkbox_debug_localhost.checkState === Qt.Checked) {
-                    hostIP = "192.168.10.194"
-                }
-                else if(checkbox_debug_localhost.checkState === Qt.Unchecked) {
-                    hostIP = "192.168.10.200"
-                }
-            }
-        }
-
         Text {
             id: text_connectstate
             x: 10
@@ -341,8 +338,8 @@ Item {
             text: ""
 
             Component.onCompleted: {
-                color = Qt.binding(function() { return messangerclient.isConnected() ? "Green" : "Red" })
-                text = Qt.binding(function() { return messangerclient.isConnected() ? "● Open" : "● Close" })
+//                color = Qt.binding(function() { return messangerclient.isConnected() ? "Green" : "Red" })
+//                text = Qt.binding(function() { return messangerclient.isConnected() ? "● Open" : "● Close" })
             }
         }
     }

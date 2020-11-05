@@ -21,7 +21,7 @@ public:
     explicit McUser();
     explicit McUser(QString _nickname);
     explicit McUser(QString _nickname, QString _profile_text);
-      ~McUser();
+    virtual ~McUser();
 
     Q_INVOKABLE int getFriendListSize();
     Q_INVOKABLE QString getFriendName(int index);

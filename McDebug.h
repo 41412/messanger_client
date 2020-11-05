@@ -10,7 +10,7 @@ class McDebug : public QObject
     Q_OBJECT
 public:
     McDebug();
-    ~McDebug();
+    virtual ~McDebug();
 
     Q_INVOKABLE void debugMessage(QString varname, int var);
     Q_INVOKABLE void debugMessage(QString varname, QString var);

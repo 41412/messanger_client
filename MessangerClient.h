@@ -8,20 +8,23 @@
 #include <stdarg.h>
 #include <McUser.h>
 #include <McDebug.h>
+#include <mcpacket.h>
 
 #define TIMEOUT 5000
 #define SEPARATOR 1
+
+
 
 class MessangerClient : public QObject
 {
     Q_OBJECT
 
-    Q_PROPERTY(McUser *mcuser )
+//    Q_PROPERTY(McUser *mcuser)
 
 public:
     MessangerClient(QObject* parent = nullptr);
     MessangerClient(McUser *mcuser);
-    ~MessangerClient();
+    virtual ~MessangerClient();
 
     QByteArray intToArray(qint32 source);
     Q_INVOKABLE bool isConnected();
@@ -31,7 +34,7 @@ public:
 
     Q_INVOKABLE void requestUserData(QString nickname);
 
-    Q_INVOKABLE void requestLogout(QString nickname);
+//    Q_INVOKABLE void requestLogout(QString nickname);
 
     void receivedFriendList(int received_size, QString strData);
 
@@ -53,7 +56,9 @@ private:
     QTcpSocket *socket;
     McUser *mcuser;
     McDebug *debugger;
+    McPacket *packet;
 
+    bool isValidPacket(QByteArray header);
     bool writeData(QString sendtype);
     bool writeData(QString sendtype, QString data);
 

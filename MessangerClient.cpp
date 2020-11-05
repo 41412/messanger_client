@@ -1,7 +1,7 @@
 #include "MessangerClient.h"
 
 MessangerClient::MessangerClient(McUser *mcuser)
-    : QObject(), socket(new QTcpSocket(this)), mcuser(mcuser), debugger(new McDebug())
+    : QObject(), socket(new QTcpSocket(this)), mcuser(mcuser), debugger(new McDebug()), packet(new McPacket())
 {
     connect(socket, SIGNAL(readyRead()), this, SLOT(readMessage()));
 //    connect(socket, SIGNAL(error(int, QString)), this, SLOT(error(int, QString)));
@@ -10,7 +10,7 @@ MessangerClient::MessangerClient(McUser *mcuser)
     connectToHost("192.168.10.194", 35000);
 }
 MessangerClient::MessangerClient(QObject* parent)
-    : QObject(parent), socket(new QTcpSocket(this)), mcuser(nullptr), debugger(new McDebug())
+    : QObject(parent), socket(new QTcpSocket(this)), mcuser(nullptr), debugger(new McDebug()), packet(new McPacket())
 {
 
 }
@@ -26,82 +26,53 @@ bool MessangerClient::isConnected()
     return (socket->state() == QAbstractSocket::ConnectedState);
 }
 
-bool MessangerClient::writeData(QString sendtype)
-{
-    QByteArray msg = sendtype.toStdString().c_str();
-    if(!isConnected())
-    {
-        return false;
-    }
-
-    debugger->debugMessage("write size", intToArray(msg.size()));
-    msg.prepend(" ");
-    msg.prepend(intToArray(msg.size()));
-    debugger->debugMessage("write data", msg);
-    socket->write(msg);
-    return socket->waitForBytesWritten(TIMEOUT);
-}
-bool MessangerClient::writeData(QString sendtype, QString data)
-{
-    data.prepend(" ");
-    data.prepend(sendtype);
-    QByteArray msg = data.toStdString().c_str();
-
-    if(!isConnected())
-    {
-        return false;
-    }
-
-    debugger->debugMessage("write size", intToArray(msg.size()));
-    msg.prepend(" ");
-    msg.prepend(intToArray(msg.size()));
-    debugger->debugMessage("write data", msg);
-    socket->write(msg);
-    return socket->waitForBytesWritten(TIMEOUT);
-}
-
 void MessangerClient::readMessage()
 {
     if(socket->bytesAvailable() >= 0)
     {
         QByteArray rawdata = socket->readAll();
-        if(rawdata.size() < 1) {
-            debugger->debugMessage("packet has no data.");
+        debugger->debugMessage("rawdata", rawdata);
+        if(!McPacket::isValidSizePacket(rawdata))
+        {
+            debugger->debugMessage("Invalid Data");
+            return;
+        }
+        if(!McPacket::isValidHeaderPacket(rawdata.mid(0, 8)))
+        {
+            debugger->debugMessage("Invalid Data");
             return;
         }
 
-        debugger->debugMessage("rawdata", rawdata);
-        int size = extractSizeToPacket(rawdata);
-        QString protocol = extractProtocolToPacket(rawdata);
-        QString data = extractDataToPacket(rawdata);
+        McPacket::removeHeader(rawdata);
+        packet->extractReadPacket(rawdata);
 
-        if(protocol == "LOGIN_SUCCESS" || protocol == "LOGIN_FAIL")
+        if(packet->getProtocol() == "LOGIN_SUCCESS" || packet->getProtocol() == "LOGIN_FAIL")
         {
-            emit resLogin(protocol, data);
+            emit resLogin(packet->getProtocol(), packet->getData());
         }
-        else if(protocol == "SUBMIT_SUCCESS" || protocol == "SUBMIT_FAIL")
+        else if(packet->getProtocol() == "SUBMIT_SUCCESS" || packet->getProtocol() == "SUBMIT_FAIL")
         {
-            emit resSubmit(protocol, data);
+            emit resSubmit(packet->getProtocol(), packet->getData());
         }
-        else if(protocol == "USERDATA_SEND_START")
+        else if(packet->getProtocol() == "USERDATA_SEND_START")
         {
-            writeData("READY_TO_RECEIVE");
+            McPacket::writePacket(socket, "READY_TO_RECEIVE");
         }
-        else if(protocol == "SEND_PROFILE")
+        else if(packet->getProtocol() == "SEND_PROFILE")
         {
 
         }
-        else if(protocol == "SEND_FRIENDLIST")
+        else if(packet->getProtocol() == "SEND_FRIENDLIST")
         {
-            int received_size = data.left(data.indexOf(' ')).toInt();
-            data.remove(0, data.indexOf((' ')) + SEPARATOR);
-            receivedFriendList(received_size, data);
+            int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
+            packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
+            receivedFriendList(received_size, packet->getData());
         }
-        else if(protocol == "SEND_CHATLIST")
+        else if(packet->getProtocol() == "SEND_CHATLIST")
         {
 
         }
-        else if(protocol == "USERDATA_SEND_END")
+        else if(packet->getProtocol() == "USERDATA_SEND_END")
         {
             emit loginCompleted();
         }
@@ -156,10 +127,8 @@ void MessangerClient::requestSubmit(QString nickname, QString password, QString 
     }
     else
     {
-        QString data = nickname;
-        data.append(" ");
-        data.append(password);
-        writeData("REQUEST_SUBMIT", data);
+        QString data = nickname + " " + password;
+        McPacket::writePacket(socket, "REQUEST_SUBMIT", data);
     }
 }
 
@@ -177,23 +146,21 @@ bool MessangerClient::requestLogin(QString nickname, QString password)
         return false;
     }
 
-    QString data = nickname;
-    data.append(" ");
-    data.append(password);
-    writeData("REQUEST_LOGIN", data);
+    QString data = nickname + " " + password;
+    McPacket::writePacket(socket, "REQUEST_LOGIN", data);
     return true;
 }
 
 void MessangerClient::requestUserData(QString nickname)
 {
 
-    writeData("REQUEST_USERDATA", nickname);
+    McPacket::writePacket(socket, "REQUEST_USERDATA", nickname);
 }
 
-void MessangerClient::requestLogout(QString nickname)
-{
-//    user
-}
+//void MessangerClient::requestLogout(QString nickname)
+//{
+
+//}
 
 void MessangerClient::receivedFriendList(int received_size, QString strData)
 {
@@ -204,7 +171,7 @@ void MessangerClient::receivedFriendList(int received_size, QString strData)
 
     if(received_size != list.size())
     {
-        writeData("DATA_ERROR");
+        McPacket::writePacket(socket, "DATA_ERROR");
     }
     else
     {
@@ -212,41 +179,8 @@ void MessangerClient::receivedFriendList(int received_size, QString strData)
         {
             mcuser->addFriend(s, "소개말");
         }
-        writeData("FRIENDLIST_RECEIVED");
+        McPacket::writePacket(socket, "FRIENDLIST_RECEIVED");
     }
-}
-
-int MessangerClient::extractSizeToPacket(QByteArray &packet)
-{
-    bool ok;
-    int size = packet.mid(0, sizeof(int)).toHex().toInt(&ok, 16);
-    packet.remove(0, sizeof(int) + SEPARATOR);
-    debugger->debugMessage("size", size);
-    return size;
-}
-
-QString MessangerClient::extractProtocolToPacket(QByteArray &packet)
-{
-    QString protocol;
-    if(packet.indexOf(' ') == -1)
-    {
-        protocol = packet;
-        packet = "";
-    }
-    else
-    {
-        protocol = packet.left(packet.indexOf(' '));
-        packet.remove(0, packet.indexOf(' ') + SEPARATOR);
-    }
-    debugger->debugMessage("protocol", protocol);
-    return protocol;
-}
-
-QString MessangerClient::extractDataToPacket(QByteArray &packet)
-{
-    QString data = QString::fromLocal8Bit(packet.data(), packet.size()).toUtf8();
-    debugger->debugMessage("data", data);
-    return data;
 }
 
 void MessangerClient::error(int socketError, const QString &message)

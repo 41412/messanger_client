@@ -18,7 +18,9 @@ SOURCES += \
         McDebug.cpp \
         McUser.cpp \
         MessangerClient.cpp \
-        main.cpp
+        datamodel.cpp \
+        main.cpp \
+        mcpacket.cpp
 
 RESOURCES += qml.qrc
 
@@ -36,4 +38,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     McDebug.h \
     McUser.h \
-    MessangerClient.h
+    MessangerClient.h \
+    datamodel.h \
+    mcpacket.h

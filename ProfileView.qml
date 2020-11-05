@@ -3,6 +3,9 @@ import QtQuick.Controls 2.13
 
 Item {
 
+    property alias nickname: text_nickname.text
+    property alias introduce: text_introduce.text
+
     Rectangle {
         anchors.fill: parent
         color: "cornsilk"
