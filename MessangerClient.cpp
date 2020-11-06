@@ -38,47 +38,51 @@ void MessangerClient::readMessage()
             return;
         }
 
-
-
         if(McPacket::isNewPacket(rawdata.mid(0, 8)))
         {
             packet->removeHeader(rawdata);
+            packet->initPacketBuffer();
             packet->extractReadPacket(rawdata);
-
-            if(packet->getProtocol() == "LOGIN_SUCCESS" || packet->getProtocol() == "LOGIN_FAIL")
-            {
-                emit resLogin(packet->getProtocol(), packet->getData());
-            }
-            else if(packet->getProtocol() == "SUBMIT_SUCCESS" || packet->getProtocol() == "SUBMIT_FAIL")
-            {
-                emit resSubmit(packet->getProtocol(), packet->getData());
-            }
-            else if(packet->getProtocol() == "USERDATA_SEND_START")
-            {
-                McPacket::writePacket(socket, "READY_TO_RECEIVE");
-            }
-            else if(packet->getProtocol() == "SEND_PROFILE")
-            {
-
-            }
-            else if(packet->getProtocol() == "SEND_FRIENDLIST")
-            {
-                int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
-                packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
-                receivedFriendList(received_size, packet->getData());
-            }
-            else if(packet->getProtocol() == "SEND_CHATLIST")
-            {
-
-            }
-            else if(packet->getProtocol() == "USERDATA_SEND_END")
-            {
-                emit loginCompleted();
-            }
         }
         else
         {
             packet->extractReadPacketData(rawdata);
+        }
+
+        if(!packet->isReadCompleted())
+        {
+            return;
+        }
+
+        if(packet->getProtocol() == "LOGIN_SUCCESS" || packet->getProtocol() == "LOGIN_FAIL")
+        {
+            emit resLogin(packet->getProtocol(), packet->getData());
+        }
+        else if(packet->getProtocol() == "SUBMIT_SUCCESS" || packet->getProtocol() == "SUBMIT_FAIL")
+        {
+            emit resSubmit(packet->getProtocol(), packet->getData());
+        }
+        else if(packet->getProtocol() == "USERDATA_SEND_START")
+        {
+            McPacket::writePacket(socket, "READY_TO_RECEIVE");
+        }
+        else if(packet->getProtocol() == "SEND_PROFILE")
+        {
+
+        }
+        else if(packet->getProtocol() == "SEND_FRIENDLIST")
+        {
+            int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
+            packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
+            receivedFriendList(received_size, packet->getData());
+        }
+        else if(packet->getProtocol() == "SEND_CHATLIST")
+        {
+
+        }
+        else if(packet->getProtocol() == "USERDATA_SEND_END")
+        {
+            emit loginCompleted();
         }
     }
 }

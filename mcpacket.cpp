@@ -15,8 +15,15 @@ void McPacket::removeHeader(QByteArray &packet)
     packet.remove(0, 8);
 }
 
+void McPacket::initPacketBuffer()
+{
+    totalsize = 0;
+    protocol = "";
+    data = "";
+}
 void McPacket::extractReadPacket(QByteArray &packet)
 {
+
     extractReadPacketTotalSize(packet);
     extractReadPacketProtocol(packet);
     extractReadPacketData(packet);
@@ -70,8 +77,9 @@ QString McPacket::getProtocol()
 
 void McPacket::extractReadPacketData(QByteArray &packet)
 {
-    int readsize = (packet.size() < remainsize) ? remainsize : packet.size();
-    data = QString::fromLocal8Bit(packet.data(), readsize).toUtf8();
+    int readsize = (packet.size() < remainsize) ? packet.size() : remainsize;
+    data += packet.mid(0, readsize);
+//    data += QString::fromLocal8Bit(packet.data(), readsize).toUtf8();
     remainsize -= readsize;
     debugger->debugMessage("data", data);
 }
@@ -82,4 +90,9 @@ QString McPacket::getData()
 void McPacket::setData(QString data)
 {
     this->data = data;
+}
+
+bool McPacket::isReadCompleted()
+{
+    return (remainsize == 0);
 }

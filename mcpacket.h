@@ -18,6 +18,7 @@ public:
     explicit McPacket();
     virtual ~McPacket();
 
+    void initPacketBuffer();
     void removeHeader(QByteArray &packet);
     void extractReadPacket(QByteArray &packet);
     void extractReadPacketTotalSize(QByteArray &packet);
@@ -30,6 +31,7 @@ public:
     void extractReadPacketData(QByteArray &packet);
     QString getData();
     void setData(QString data);
+    bool isReadCompleted();
 
     static void writePacket(QTcpSocket *socket, QString protocol)
     {
