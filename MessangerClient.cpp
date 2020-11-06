@@ -152,7 +152,6 @@ bool MessangerClient::requestLogin(QString nickname, QString password)
 
 void MessangerClient::requestUserData(QString nickname)
 {
-
     McPacket::writePacket(socket, "REQUEST_USERDATA", nickname);
 }
 
@@ -176,7 +175,7 @@ void MessangerClient::receivedFriendList(int received_size, QString strData)
     {
         foreach(QString s, list)
         {
-            mcuser->addFriend(s, "소개말");
+            mcuser->getFriendModel()->addFriend(mcUserFriend(s, "profile"));
         }
         McPacket::writePacket(socket, "FRIENDLIST_RECEIVED");
     }

@@ -37,7 +37,7 @@ Item {
         text: "로그아웃"
 
         onClicked: {
-//            messangerclient.clientDisconnect()
+            messangerclient.clientDisconnect()
         }
     }
 }

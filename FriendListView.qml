@@ -3,13 +3,6 @@ import QtQuick.Controls 2.13
 
 Item {
 
-    Component.onCompleted: {
-        for(var i = 0; i < mcuser.getFriendListSize(); i++) {
-            listview_friendlist.model.append({ "friendlist_nickname": mcuser.getFriendName(i),
-                                                 "friendlist_profile": mcuser.getFriendProfile(i) })
-        }
-    }
-
     Component {
         id: friendlistDelegate
 
@@ -22,7 +15,7 @@ Item {
                 y: 0
                 anchors.left: parent.left
                 anchors.leftMargin: 25
-                text: friendlist_nickname
+                text: nickname
             }
 
             Text {
@@ -30,7 +23,7 @@ Item {
                 y: 50
                 anchors.left: parent.left
                 anchors.leftMargin: 25
-                text: friendlist_profile
+                text: profile
             }
 
             Rectangle {
@@ -46,6 +39,7 @@ Item {
                 anchors.fill: parent
 
                 onClicked: {
+                    console.log("index" + index)
                     listview_friendlist.currentIndex = index
                 }
             }
@@ -55,8 +49,7 @@ Item {
     ListView {
         id: listview_friendlist
         anchors.fill: parent
-        model: ListModel{}
-//        model: mcuser.friend_list   고려해볼것
+        model: friendmodel
         delegate: friendlistDelegate
         highlight: Rectangle { color: "lightsteelblue"; radius: 5 }
         highlightFollowsCurrentItem: true

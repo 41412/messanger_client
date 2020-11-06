@@ -9,7 +9,7 @@ Item {
     width: 500
     height: 700
 
-    property var hostIP: "192.168.10.200"
+    property var hostIP: "192.168.10.194"
     property real portNumber: 35000
 
     function eraseLoginInfo() {

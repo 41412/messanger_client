@@ -3,12 +3,8 @@
 
 #include <QObject>
 #include <QQmlEngine>
-
-struct UserFriend {
-    UserFriend(QString nickname, QString profile) : nickname(nickname), profile(profile) {}
-    QString nickname;
-    QString profile;
-};
+#include <mcUserFriend.h>
+#include <mcFriendModel.h>
 
 class McUser : public QObject
 {
@@ -19,19 +15,14 @@ class McUser : public QObject
 
 public:
     explicit McUser();
-    explicit McUser(QString _nickname);
-    explicit McUser(QString _nickname, QString _profile_text);
     virtual ~McUser();
-
-    Q_INVOKABLE int getFriendListSize();
-    Q_INVOKABLE QString getFriendName(int index);
-    Q_INVOKABLE QString getFriendProfile(int index);
 
     QString getNickname() { return nickname; }
     void setNickname(QString text) { nickname = text; }
     QString getProfileText() { return profile_text; }
     void setProfileText(QString text) { profile_text = text; }
     void addFriend(QString, QString);
+    mcFriendModel* getFriendModel();
 
 signals:
     void nameChanged();
@@ -40,7 +31,7 @@ signals:
 private:
     QString nickname;
     QString profile_text;
-    QVector<UserFriend> friend_list;
+    mcFriendModel friendmodel;
 //    QVector<ChatRoom> chatroom_list;
 
 

@@ -18,8 +18,9 @@ SOURCES += \
         McDebug.cpp \
         McUser.cpp \
         MessangerClient.cpp \
-        datamodel.cpp \
         main.cpp \
+        mcFriendModel.cpp \
+        mcUserFriend.cpp \
         mcpacket.cpp
 
 RESOURCES += qml.qrc
@@ -39,5 +40,6 @@ HEADERS += \
     McDebug.h \
     McUser.h \
     MessangerClient.h \
-    datamodel.h \
+    mcFriendModel.h \
+    mcUserFriend.h \
     mcpacket.h

@@ -9,6 +9,7 @@
 #include <McUser.h>
 #include <McDebug.h>
 #include <mcpacket.h>
+#include <mcFriendModel.h>
 
 #define TIMEOUT 5000
 #define SEPARATOR 1
