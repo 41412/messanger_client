@@ -1,4 +1,4 @@
-#include "mcpacket.h"
+#include "mcPacket.h"
 
 McPacket::McPacket() : isReceiving(false)
 {
@@ -56,7 +56,7 @@ int McPacket::getRemainSize()
 
 void McPacket::extractReadPacketProtocol(QByteArray &packet)
 {
-    if(packet.indexOf(' ') == -1)
+    if(packet.indexOf(0x1D) == -1)
     {
         protocol = packet;
         packet = "";
@@ -64,8 +64,8 @@ void McPacket::extractReadPacketProtocol(QByteArray &packet)
     }
     else
     {
-        protocol = packet.left(packet.indexOf(' '));
-        packet.remove(0, packet.indexOf(' ') + SEPARATOR);
+        protocol = packet.left(packet.indexOf(0x1D));
+        packet.remove(0, packet.indexOf(0x1D) + SEPARATOR);
         remainsize -= (protocol.size() + SEPARATOR);
     }
     debugger->debugMessage("protocol", protocol);

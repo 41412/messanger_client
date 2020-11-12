@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include <McUser.h>
 #include <McDebug.h>
-#include <mcpacket.h>
+#include <mcPacket.h>
 #include <mcFriendModel.h>
 
 #define TIMEOUT 5000
@@ -32,12 +32,16 @@ public:
     Q_INVOKABLE void connectToHost(QString host, quint16 port);
     Q_INVOKABLE void requestSubmit(QString nickname, QString password, QString confirm);
     Q_INVOKABLE bool requestLogin(QString nickname, QString password);
-
     Q_INVOKABLE void requestUserData(QString nickname);
+
+    Q_INVOKABLE void requestEnterChatRoom(QString roomid);
 
 //    Q_INVOKABLE void requestLogout(QString nickname);
 
-    void receivedFriendList(int received_size, QString strData);
+    void receivedFriendList(QString);
+    void receivedChatroomList(QString);
+
+    void updateChat(QString);
 
     // for debugging
     Q_INVOKABLE void clientDisconnect();
@@ -48,6 +52,8 @@ signals:
     void resFriendList(int protocol, QString data);
     void disconnected();
     void loginCompleted();
+    void resEnterChatRoom();
+//    void resEnterChatRoom(mcChatModel);
 //    void error(int socketError, QString &message);
 
 public slots:

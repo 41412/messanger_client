@@ -19,9 +19,13 @@ SOURCES += \
         McUser.cpp \
         MessangerClient.cpp \
         main.cpp \
+        mcChat.cpp \
+        mcChatModel.cpp \
+        mcChatroom.cpp \
+        mcChatroomModel.cpp \
         mcFriendModel.cpp \
-        mcUserFriend.cpp \
-        mcpacket.cpp
+        mcPacket.cpp \
+        mcUserFriend.cpp
 
 RESOURCES += qml.qrc
 
@@ -40,6 +44,10 @@ HEADERS += \
     McDebug.h \
     McUser.h \
     MessangerClient.h \
+    mcChat.h \
+    mcChatModel.h \
+    mcChatroom.h \
+    mcChatroomModel.h \
     mcFriendModel.h \
-    mcUserFriend.h \
-    mcpacket.h
+    mcPacket.h \
+    mcUserFriend.h

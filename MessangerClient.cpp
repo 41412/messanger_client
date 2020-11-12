@@ -72,17 +72,31 @@ void MessangerClient::readMessage()
         }
         else if(packet->getProtocol() == "SEND_FRIENDLIST")
         {
-            int received_size = packet->getData().left(packet->getData().indexOf(' ')).toInt();
-            packet->setData(packet->getData().remove(0, packet->getData().indexOf(' ') + SEPARATOR));
-            receivedFriendList(received_size, packet->getData());
+            receivedFriendList(packet->getData());
         }
-        else if(packet->getProtocol() == "SEND_CHATLIST")
+        else if(packet->getProtocol() == "SEND_CHATROOMLIST")
         {
-
+            receivedChatroomList(packet->getData());
         }
         else if(packet->getProtocol() == "USERDATA_SEND_END")
         {
             emit loginCompleted();
+        }
+        else if(packet->getProtocol() == "RESPONSE_CREATE_CHATROOM")
+        {
+
+        }
+        else if(packet->getProtocol() == "RESPONSE_INVITE_USER")
+        {
+
+        }
+        else if(packet->getProtocol() == "RESPONSE_LEAVE_CHATROOM")
+        {
+
+        }
+        else if(packet->getProtocol() == "UPDATE_CHAT")
+        {
+            updateChat(packet->getData());
         }
     }
 }
@@ -160,14 +174,16 @@ void MessangerClient::requestUserData(QString nickname)
 
 //}
 
-void MessangerClient::receivedFriendList(int received_size, QString strData)
+void MessangerClient::receivedFriendList(QString strData)
 {
-    QStringList list = strData.split(' ');
-    int real_size = strData.split(' ').length();
-    debugger->debugMessage("received_size", received_size);
-    debugger->debugMessage("real_size", real_size);
+    int friend_size = strData.left(strData.indexOf(0x1D)).toInt();
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    QStringList list = strData.split(0x1D);
+    int real_size = strData.split(0x1D).length();
+    debugger->debugMessage("friendsize", friend_size);
+    debugger->debugMessage("realsize", real_size);
 
-    if(received_size != list.size())
+    if(friend_size != list.size())
     {
         McPacket::writePacket(socket, "DATA_ERROR");
     }
@@ -179,6 +195,67 @@ void MessangerClient::receivedFriendList(int received_size, QString strData)
         }
         McPacket::writePacket(socket, "FRIENDLIST_RECEIVED");
     }
+}
+
+void MessangerClient::receivedChatroomList(QString strData)
+{
+    int room_size = strData.left(strData.indexOf(0x1D)).toInt();
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    QStringList room_list = strData.split(0x1D);
+
+    if(room_size != room_list.size())
+    {
+        McPacket::writePacket(socket, "DATA_ERROR");
+        return;
+    }
+    else
+    {
+        foreach(QString room, room_list)
+        {
+            QString roomid = room.left(room.indexOf(0x1E));
+            room.remove(0, room.indexOf(0x1E) + SEPARATOR);
+            int attendee_size = room.left(room.indexOf(0x1E)).toInt();
+            room.remove(0, room.indexOf(0x1E) + SEPARATOR);
+            QStringList attendee_list = room.split(0x1E);
+            if(attendee_size != attendee_list.size())
+            {
+                McPacket::writePacket(socket, "DATA_ERROR");
+                return;
+            }
+            else
+            {
+                QVector<QString> attendees;
+                foreach(QString attendee, attendee_list)
+                {
+                    attendees.push_back(attendee);
+                }
+                mcuser->getChatroomModel()->addChatroom(mcChatroom(roomid, attendees));
+            }
+        }
+        McPacket::writePacket(socket, "CHATROOMLIST_RECEIVED");
+    }
+}
+
+void MessangerClient::requestEnterChatRoom(QString roomid)
+{
+    emit resEnterChatRoom();
+//    emit resEnterChatRoom(mcuser->getChatroomModel()->getChatroom(roomid)->chatmodel());
+}
+
+void MessangerClient::updateChat(QString strData)
+{
+    QString roomid = strData.left(strData.indexOf(0x1D));
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    int index = strData.left(strData.indexOf(0x1D)).toInt();
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    QString sender = strData.left(strData.indexOf(0x1D));
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    QString time = strData.left(strData.indexOf(0x1D));
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+    QString message = strData.left(strData.indexOf(0x1D));
+    strData.remove(0, strData.indexOf(0x1D) + SEPARATOR);
+
+    mcuser->getChatroomModel()->getChatroom(roomid)->addChat(index, sender, time, message);
 }
 
 void MessangerClient::error(int socketError, const QString &message)

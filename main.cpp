@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("messangerclient", &messangerclient);
     engine.rootContext()->setContextProperty("mcuser", &mcuser);
     engine.rootContext()->setContextProperty("friendmodel", mcuser.getFriendModel());
+    engine.rootContext()->setContextProperty("chatroommodel", mcuser.getChatroomModel());
+//    engine.rootContext()->setContextProperty("chatmodel", mcuser.getChatModel());
+//    engine.rootContext()->setContextProperty("chatmodel", mcuser.getChatModelList());
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

@@ -5,6 +5,8 @@
 #include <QQmlEngine>
 #include <mcUserFriend.h>
 #include <mcFriendModel.h>
+#include <mcChatroom.h>
+#include <mcChatroomModel.h>
 
 class McUser : public QObject
 {
@@ -12,6 +14,7 @@ class McUser : public QObject
 
     Q_PROPERTY(QString nickname READ getNickname WRITE setNickname NOTIFY nameChanged)
     Q_PROPERTY(QString profile_text READ getProfileText WRITE setProfileText NOTIFY profileChanged)
+    // Idea : Q_PROPERTY로 chatmodel을 읽고, 변경을 감지하는 것을 만들어보면?
 
 public:
     explicit McUser();
@@ -21,8 +24,10 @@ public:
     void setNickname(QString text) { nickname = text; }
     QString getProfileText() { return profile_text; }
     void setProfileText(QString text) { profile_text = text; }
-    void addFriend(QString, QString);
     mcFriendModel* getFriendModel();
+    mcChatroomModel* getChatroomModel();
+    mcChatModel* getChatModel();                // Test
+//    mcChatroom findChatroom(QString roomid);
 
 signals:
     void nameChanged();
@@ -32,8 +37,7 @@ private:
     QString nickname;
     QString profile_text;
     mcFriendModel friendmodel;
-//    QVector<ChatRoom> chatroom_list;
-
+    mcChatroomModel* chatroommodel;
 
 };
 
